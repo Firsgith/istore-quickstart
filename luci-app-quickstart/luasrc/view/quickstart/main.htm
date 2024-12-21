@@ -3,18 +3,24 @@
   local jsonc = require "luci.jsonc"
   local features = { "_lua_force_array_" }
   local configs = {}
+  
+  -- 检查是否启用 ota 功能
   if luci.sys.call("which ota >/dev/null 2>&1 && ota >/dev/null 2>&1") == 0 then
       features[#features+1] = "ota"
   end
+  -- 检查是否存在 sandbox 功能
   if luci.sys.call("[ -d /ext_overlay ] >/dev/null 2>&1") == 0 then
       features[#features+1] = "sandbox"
   end
+  -- 检查是否启用 dockerd 功能
   if luci.sys.call("[ -e /etc/init.d/dockerd ] >/dev/null 2>&1") == 0 then
       features[#features+1] = "dockerd"
   end
+  -- 检查是否启用 unishare 功能
   if luci.sys.call("[ -e /etc/init.d/unishare ] >/dev/null 2>&1") == 0 then
       features[#features+1] = "unishare"
   end
+  -- 检查是否启用 ttyd 功能
   if luci.sys.call("/etc/init.d/ttyd running >/dev/null 2>&1") == 0 then
       features[#features+1] = "ttyd"
       local uci  = require "luci.model.uci".cursor()
@@ -25,14 +31,22 @@
         ssl = ssl == "1"
       }
   end
--%>
+%>
 <script>
     (function(){
       window.token = "<%=token%>";
       var vue_prefix="<%=prefix%>";
       window.vue_base = vue_prefix + '/';
+      
+      // 语言处理
+      window.vue_lang_data = '/luci-static/quickstart/i18n/<%=lang%>.json<%# ?v=PKG_VERSION %>';
+      window.vue_lang = '<%=lang%>';
+      
+      // 特性和配置
       window.quickstart_features = <%=jsonc.stringify(features)%>;
       window.quickstart_configs = <%=jsonc.stringify(configs)%>;
+
+      // 确保页面重定向到正确的路径
       if (location.pathname != vue_prefix && !location.pathname.startsWith(window.vue_base)) {
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, null, vue_prefix);

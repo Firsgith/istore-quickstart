@@ -13,6 +13,7 @@ local BLOCKSIZE = 2048
 local ISTOREOS_PORT = 3038
 
 function index()
+    entry({"admin", "nas"}, firstchild(), _("NAS"), 45).dependent = false  -- 保留第一个文件的 'nas' 条目
     entry({"istore"}, call("istore_backend")).leaf=true
 end
 
@@ -186,4 +187,3 @@ function istore_backend()
 
   sock:close()
 end
-
